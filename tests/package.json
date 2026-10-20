@@ -1,0 +1,1 @@
+{"name":"qr-studio-tests","private":true,"description":"Headless Chrome scan + UI tests. Run: npm i jsqr pngjs puppeteer-core @zxing/library, serve the repo on :8123, then node scan-test.js and node ui-test.js","license":"MIT"}

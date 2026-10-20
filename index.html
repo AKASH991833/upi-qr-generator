@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>UPI QR Generator - free payment QR for your shop</title>
-<meta name="description" content="Make a UPI payment QR code for your shop or business. Enter name, UPI ID and amount. Download a ready poster. Free, no sign-up, nothing is uploaded.">
+<title>QR Studio - QR for UPI, link, YouTube, WhatsApp, Wi-Fi and more</title>
+<meta name="description" content="Free QR code maker. Paste any link, YouTube video, UPI, WhatsApp, phone, Wi-Fi, contact or text. Add a name, pick one of 4 premium styles, download PNG or SVG. No sign-up, nothing uploaded.">
 <meta name="theme-color" content="#6d5dfc">
-<meta property="og:title" content="UPI QR Generator">
-<meta property="og:description" content="Make a UPI payment QR for your shop in 10 seconds. Free, private, works offline.">
+<meta property="og:title" content="QR Studio">
+<meta property="og:description" content="Any QR in 10 seconds: link, YouTube, UPI, WhatsApp, Wi-Fi. 4 premium styles. Free and private.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
@@ -16,83 +16,73 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><img src="icon.svg" alt="" width="34" height="34"><div><b>UPI QR</b><span>for shops</span></div></div>
+  <div class="brand"><img src="icon.svg" alt="" width="34" height="34"><div><b>QR Studio</b><span>sab kuch ka QR</span></div></div>
   <button id="themeBtn" class="icon-btn" type="button" aria-label="Switch dark or light mode" title="Dark / Light"><span aria-hidden="true">&#9680;</span></button>
 </header>
 
 <main class="wrap">
   <section class="hero">
-    <h1>Make your shop's <em>payment QR</em> in 10 seconds</h1>
-    <p>Type your name and UPI ID. Download the QR or a ready poster. Works with GPay, PhonePe, Paytm and every UPI app.</p>
+    <h1>Kuch bhi paste karo, <em>premium QR</em> pao</h1>
+    <p>Website, YouTube video, UPI, WhatsApp, Wi-Fi, contact ya text. Naam likho, 4 futuristic style me se chuno, PNG ya SVG download karo.</p>
   </section>
 
   <div class="grid">
     <form id="form" class="card" autocomplete="off" novalidate>
-      <h2>1. Your details</h2>
-      <label for="pn">Shop / Business name <small>(customer will see this)</small></label>
-      <input id="pn" name="pn" type="text" maxlength="60" placeholder="e.g. Sharma General Store" required>
-      <div class="err" id="pnErr" role="alert"></div>
+      <h2>1. Kis cheez ka QR?</h2>
+      <div id="types" class="types" role="radiogroup" aria-label="QR type"></div>
 
-      <label for="pa">UPI ID <small>(like name@bank)</small></label>
-      <input id="pa" name="pa" type="text" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="100" placeholder="e.g. shopname@okaxis" required>
-      <div class="err" id="paErr" role="alert"></div>
+      <div id="fields" class="fields"></div>
 
-      <div class="two">
-        <div>
-          <label for="am">Amount <small>(optional)</small></label>
-          <input id="am" name="am" type="text" inputmode="decimal" maxlength="10" placeholder="Leave empty = customer types">
-          <div class="err" id="amErr" role="alert"></div>
-        </div>
-        <div>
-          <label for="tn">Note <small>(optional)</small></label>
-          <input id="tn" name="tn" type="text" maxlength="40" placeholder="e.g. Bill payment">
-        </div>
+      <div id="labelBox">
+        <h2 class="mt">2. Naam / Label <small>(optional)</small></h2>
+        <label for="lb">Naam ya kis liye <small>(QR card par dikhega)</small></label>
+        <input id="lb" type="text" maxlength="50" placeholder="e.g. Akash ka YouTube / Shop Wi-Fi">
+        <label for="sb">Chhoti line <small>(optional)</small></label>
+        <input id="sb" type="text" maxlength="60" placeholder="e.g. Scan karke subscribe karo">
       </div>
 
-      <h2 class="mt">2. Poster style</h2>
-      <div class="styles" role="radiogroup" aria-label="Poster style">
-        <button type="button" class="sty" data-s="classic" aria-pressed="true"><i style="background:#fff;border:1px solid #cfd3e6"></i>White</button>
-        <button type="button" class="sty" data-s="violet" aria-pressed="false"><i style="background:linear-gradient(135deg,#6d5dfc,#2dd4bf)"></i>Violet</button>
-        <button type="button" class="sty" data-s="dark" aria-pressed="false"><i style="background:#0f1220"></i>Dark</button>
-      </div>
+      <h2 class="mt" id="h3">3. Style chuno</h2>
+      <div id="styles" class="styles" role="radiogroup" aria-label="QR style"></div>
 
-      <label class="chk"><input id="remember" type="checkbox"> Remember my details on this phone</label>
+      <label class="chk"><input id="remember" type="checkbox"> Meri details is phone me yaad rakho</label>
 
-      <div class="notice">
-        <b>No payment happens here.</b> This only makes a QR. Money goes straight from the customer to your UPI ID. Please scan it once with your own UPI app before you print.
-      </div>
+      <div class="notice" id="notice"></div>
     </form>
 
     <section class="card preview" aria-live="polite">
-      <h2>Your QR</h2>
+      <h2>Aapka QR</h2>
       <div id="stage" class="stage">
-        <canvas id="cv" width="1080" height="1500" aria-label="Payment QR poster preview"></canvas>
-        <div id="empty" class="empty">Fill your name and UPI ID.<br>Your QR will show here.</div>
+        <canvas id="cv" width="1080" height="1500" aria-label="QR card preview"></canvas>
+        <div id="empty" class="empty">Details bharo.<br>QR yahan dikhega.</div>
       </div>
+      <div id="scanBadge" class="scanbadge" hidden></div>
+      <div id="thumbs" class="thumbs" role="radiogroup" aria-label="Pick a style"></div>
       <div class="actions">
-        <button id="dlPoster" class="btn primary" type="button" disabled>Download poster (PNG)</button>
-        <button id="dlQr" class="btn" type="button" disabled>QR only</button>
-        <button id="print" class="btn" type="button" disabled>Print</button>
+        <button id="dlPng" class="btn primary" type="button" disabled>Card download (PNG)</button>
+        <button id="dlQr" class="btn" type="button" disabled>Sirf QR (PNG)</button>
+        <button id="dlSvg" class="btn" type="button" disabled>SVG</button>
+        <button id="share" class="btn" type="button" disabled>Share</button>
         <button id="copy" class="btn" type="button" disabled>Copy link</button>
+        <button id="print" class="btn" type="button" disabled>Print</button>
       </div>
       <div id="toast" class="toast" role="status"></div>
       <details class="how">
-        <summary>How to use</summary>
+        <summary>Kaise use karein</summary>
         <ol>
-          <li>Fill name and UPI ID (amount is optional).</li>
-          <li>Download the poster. Print it or send it on WhatsApp.</li>
-          <li>Customer scans with any UPI app and pays you directly.</li>
+          <li>Type chuno (ya "Auto" me kuch bhi paste karo).</li>
+          <li>Naam likho agar chaho, phir style chuno.</li>
+          <li>Download ya Share karo. Print karne se pehle phone se ek baar scan karke check karo.</li>
         </ol>
-        <p>Fixed amount QR is good for a bill. Leave amount empty for a shop counter QR.</p>
+        <p><b>Photo ya video ka QR:</b> QR ke andar file nahi aa sakti, sirf link aata hai. Photo/video ko pehle Google Drive, Google Photos ya Instagram par daalo, "Anyone with the link" share link copy karo, aur "Photo / Video" type me paste karo.</p>
       </details>
     </section>
   </div>
 
   <footer>
-    <p>Free. No sign-up. Your details stay on your device - nothing is uploaded. Built on <a href="https://github.com/AKASH991833/upi-qr-generator" rel="noopener">GitHub</a>.</p>
+    <p>Free. Sign-up nahi. Aapka data sirf aapke device par rehta hai, kuch upload nahi hota. <a href="https://github.com/AKASH991833/upi-qr-generator" rel="noopener">GitHub</a></p>
   </footer>
 </main>
-<script src="vendor/qrcode.js"></script>
+<script src="vendor/qrcore.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
