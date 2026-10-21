@@ -16,22 +16,22 @@ var VPA=/^[a-zA-Z0-9][a-zA-Z0-9.\-_]{1,255}@[a-zA-Z][a-zA-Z0-9]{1,63}$/;
 var EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 var DOMAIN=/^(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[\/:?#]\S*)?$/i;
 function normUrl(s){
-  s=clean(s);if(!s)return {err:'Link daalo.'};
+  s=clean(s);if(!s)return {err:'Enter a link.'};
   if(!/^[a-z][a-z0-9+.\-]*:/i.test(s)){
-    if(!DOMAIN.test(s)&&!/^localhost/i.test(s))return {err:'Ye link sahi nahi lag raha. Jaise: youtube.com/watch?v=... ya https://example.com'};
+    if(!DOMAIN.test(s)&&!/^localhost/i.test(s))return {err:'That does not look like a valid link. Example: youtube.com/watch?v=... or https://example.com'};
     s='https://'+s;
   }
-  var u;try{u=new URL(s)}catch(e){return {err:'Ye link sahi nahi lag raha.'}}
-  if(u.protocol!=='http:'&&u.protocol!=='https:')return {err:'Sirf http ya https link allowed hai.'};
-  if(!u.hostname||u.hostname.indexOf('.')<0)return {err:'Link me website ka naam chahiye, jaise example.com'};
+  var u;try{u=new URL(s)}catch(e){return {err:'That does not look like a valid link.'}}
+  if(u.protocol!=='http:'&&u.protocol!=='https:')return {err:'Only http or https links are allowed.'};
+  if(!u.hostname||u.hostname.indexOf('.')<0)return {err:'The link needs a website name, like example.com'};
   return {url:u.href,host:u.hostname.replace(/^www\./,'')};
 }
 function isYT(host){return /(^|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)$/.test(host)}
 function phoneDigits(s,cc){
   var raw=clean(s),plus=raw.charAt(0)==='+',d=raw.replace(/\D/g,'');
-  if(!d)return {err:'Phone number daalo.'};
+  if(!d)return {err:'Enter a phone number.'};
   if(!plus){if(d.length===10)d=cc+d;else if(d.length===11&&d.charAt(0)==='0')d=cc+d.slice(1)}
-  if(d.length<8||d.length>15)return {err:'Number sahi nahi lag raha. Country code ke saath ya 10 digit daalo.'};
+  if(d.length<8||d.length>15)return {err:'That number does not look right. Enter it with the country code or as 10 digits.'};
   return {digits:d};
 }
 function wifiEsc(s){return String(s).replace(/([\\;,:"])/g,'\\$1')}
@@ -40,10 +40,10 @@ function short(s,n){s=String(s);return s.length>n?s.slice(0,n-1)+'\u2026':s}
 
 // ---------- types ----------
 // each: id,label,fields[],build(vals)->{payload,gist,gist2,caption,label,foot,kind} | {err:{field:msg}}
-var CHIP='Camera se scan karo';
+var CHIP='Scan with your camera';
 var TYPES=[
- {id:'auto',label:'Auto',hint:'Kuch bhi paste karo: link, YouTube, UPI ID, number, email, Wi-Fi, text. Type apne aap pehchan lenge.',
-  fields:[{id:'any',label:'Yahan paste karo',ph:'e.g. https://youtu.be/... ya name@okaxis ya 9876543210',area:true,max:1000}],
+ {id:'auto',label:'Auto',hint:'Paste anything: a link, YouTube video, UPI ID, number, email, Wi-Fi or text. The type is detected automatically.',
+  fields:[{id:'any',label:'Paste here',ph:'e.g. https://youtu.be/... or name@okaxis or 9876543210',area:true,max:1000}],
   build:function(v){
     var s=String(v.any||'').trim();if(!s)return {empty:true};
     var t=detect(s);var T=byId(t);var map={};
@@ -54,100 +54,100 @@ var TYPES=[
     else if(t==='upi'){var rr=rawUpi('upi://pay?pa='+enc(s.toLowerCase())+'&cu=INR');rr.detected='UPI ID';return rr}
     var r=T.build(map);if(r&&!r.err&&!r.empty)r.detected=T.label;return r;
   }},
- {id:'link',label:'Website',hint:'Koi bhi website ya page ka link.',
-  fields:[{id:'u',label:'Website link',ph:'e.g. example.com ya https://example.com/page',max:1000}],
+ {id:'link',label:'Website',hint:'A link to any website or page.',
+  fields:[{id:'u',label:'Website link',ph:'e.g. example.com or https://example.com/page',max:1000}],
   build:function(v){
     var n=normUrl(v.u);if(n.err)return {err:{u:n.err}};
     return {payload:n.url,gist:n.host,caption:isYT(n.host)?'SCAN TO WATCH':'SCAN TO OPEN',foot:CHIP,kind:isYT(n.host)?'YouTube':'Website'};
   }},
- {id:'yt',label:'YouTube',hint:'YouTube video, Shorts ya channel ka link paste karo. Scan karte hi YouTube me khulega.',
+ {id:'yt',label:'YouTube',hint:'Paste a YouTube video, Shorts or channel link. It opens straight in YouTube when scanned.',
   fields:[{id:'u',label:'YouTube link',ph:'e.g. https://youtu.be/xxxx ya youtube.com/@channel',max:1000}],
   build:function(v){
     var n=normUrl(v.u);if(n.err)return {err:{u:n.err}};
-    if(!isYT(n.host))return {err:{u:'Ye YouTube link nahi hai. Website type use karo ya YouTube link daalo.'}};
+    if(!isYT(n.host))return {err:{u:'This is not a YouTube link. Use the Website type or paste a YouTube link.'}};
     return {payload:n.url,gist:n.host,caption:'SCAN TO WATCH',foot:CHIP,kind:'YouTube'};
   }},
- {id:'media',label:'Photo / Video',hint:'QR me file nahi aa sakti, sirf link. Photo ya video ko pehle Google Drive / Google Photos / Instagram par daalo, "Anyone with the link" share link copy karo, phir yahan paste karo.',
-  fields:[{id:'u',label:'Photo ya video ka share link',ph:'e.g. https://drive.google.com/file/d/.../view',max:1000}],
+ {id:'media',label:'Photo / Video',hint:'A QR code cannot hold the file itself, only a link. Upload the photo or video to Google Drive, Google Photos or Instagram first, copy the "Anyone with the link" share link, then paste it here.',
+  fields:[{id:'u',label:'Photo or video share link',ph:'e.g. https://drive.google.com/file/d/.../view',max:1000}],
   build:function(v){
     var n=normUrl(v.u);if(n.err)return {err:{u:n.err}};
     return {payload:n.url,gist:n.host,caption:'SCAN TO VIEW',foot:CHIP,kind:'Photo / Video link'};
   }},
- {id:'upi',label:'UPI',hint:'Dukaan ya personal payment QR. Customer scan karke seedha aapke UPI ID par pay karega.',
+ {id:'upi',label:'UPI',hint:'Payment QR for your shop or personal use. Customers scan it and pay straight to your UPI ID.',
   fields:[
-   {id:'pn',label:'Naam (customer ko dikhega)',ph:'e.g. Sharma General Store',max:60,req:1},
+   {id:'pn',label:'Name (shown to the customer)',ph:'e.g. Sharma General Store',max:60,req:1},
    {id:'pa',label:'UPI ID (name@bank)',ph:'e.g. shopname@okaxis',max:100,req:1,mode:'email'},
-   {id:'am',label:'Amount (optional)',ph:'Khali = customer khud likhega',max:10,mode:'decimal',half:1},
+   {id:'am',label:'Amount (optional)',ph:'Leave empty and the customer enters it',max:10,mode:'decimal',half:1},
    {id:'tn',label:'Note (optional)',ph:'e.g. Bill payment',max:40,half:1}],
   noLabel:true,
   build:function(v){
     var name=clean(v.pn),id=clean(v.pa).toLowerCase(),amt=clean(v.am),e={};
-    if(!name)e.pn='Naam daalo.';
-    if(!id)e.pa='UPI ID daalo.';else if(!VPA.test(id))e.pa='UPI ID galat lag raha hai. Aisa hona chahiye: name@bank (space nahi).';
-    if(amt){if(!/^\d{1,6}(\.\d{1,2})?$/.test(amt))e.am='Amount number me likho, jaise 250 ya 99.50.';
-      else if(parseFloat(amt)<=0)e.am='Amount 0 se zyada hona chahiye.';
-      else if(parseFloat(amt)>100000)e.am='UPI me ek payment ki limit Rs 1,00,000 hai.'}
+    if(!name)e.pn='Enter a name.';
+    if(!id)e.pa='Enter a UPI ID.';else if(!VPA.test(id))e.pa='That UPI ID looks wrong. It should look like name@bank (no spaces).';
+    if(amt){if(!/^\d{1,6}(\.\d{1,2})?$/.test(amt))e.am='Enter the amount as a number, like 250 or 99.50.';
+      else if(parseFloat(amt)<=0)e.am='Amount must be more than 0.';
+      else if(parseFloat(amt)>100000)e.am='UPI allows up to Rs 1,00,000 per payment.'}
     if(e.pn||e.pa||e.am)return {err:e};
     var a=amt?parseFloat(amt).toFixed(2).replace(/\.00$/,''):'';
     var u='upi://pay?pa='+enc(id)+'&pn='+enc(name)+'&cu=INR';if(a)u+='&am='+enc(a);if(clean(v.tn))u+='&tn='+enc(clean(v.tn));
     return {payload:u,gist:'UPI ID: '+id,gist2:a?'Rs '+Number(a).toLocaleString('en-IN',{minimumFractionDigits:a.indexOf('.')>-1?2:0}):'',caption:'SCAN & PAY',label:name,foot:'GPay  |  PhonePe  |  Paytm  |  BHIM  |  any UPI app',kind:'UPI'};
   }},
- {id:'wa',label:'WhatsApp',hint:'Scan karte hi aapke number par WhatsApp chat khulega (optional message ke saath).',
+ {id:'wa',label:'WhatsApp',hint:'Scanning opens a WhatsApp chat with your number, with an optional pre-filled message.',
   fields:[
-   {id:'ph',label:'WhatsApp number',ph:'e.g. 9876543210 ya +91 98765 43210',max:20,mode:'tel',req:1},
-   {id:'ms',label:'Pehle se likha message (optional)',ph:'e.g. Hi, mujhe booking karni hai',max:200,area:true}],
+   {id:'ph',label:'WhatsApp number',ph:'e.g. 9876543210 or +91 98765 43210',max:20,mode:'tel',req:1},
+   {id:'ms',label:'Pre-filled message (optional)',ph:'e.g. Hi, I would like to book',max:200,area:true}],
   build:function(v){
     var p=phoneDigits(v.ph,'91');if(p.err)return {err:{ph:p.err}};
     var u='https://wa.me/'+p.digits;var m=clean(v.ms);if(m)u+='?text='+enc(m);
     return {payload:u,gist:'+'+p.digits,caption:'SCAN TO CHAT',foot:CHIP,kind:'WhatsApp'};
   }},
- {id:'phone',label:'Phone',hint:'Scan karte hi call lagane ka option aayega.',
+ {id:'phone',label:'Phone',hint:'Scanning shows the call option right away.',
   fields:[{id:'ph',label:'Phone number',ph:'e.g. 9876543210',max:20,mode:'tel'}],
   build:function(v){var p=phoneDigits(v.ph,'91');if(p.err)return {err:{ph:p.err}};
     return {payload:'tel:+'+p.digits,gist:'+'+p.digits,caption:'SCAN TO CALL',foot:CHIP,kind:'Phone'}}},
- {id:'wifi',label:'Wi-Fi',hint:'Scan karke seedha Wi-Fi se jud jao. Password QR ke andar hota hai, isliye card par nahi likha jata. QR sirf bharosemand logon ko do.',
+ {id:'wifi',label:'Wi-Fi',hint:'Scan to join the Wi-Fi directly. The password lives inside the QR code and is never printed on the card, so share the QR only with people you trust.',
   fields:[
-   {id:'ss',label:'Wi-Fi ka naam (SSID)',ph:'e.g. Home_WiFi',max:32,req:1},
-   {id:'pw',label:'Password',ph:'Khali = open network',max:63,half:1},
+   {id:'ss',label:'Wi-Fi name (SSID)',ph:'e.g. Home_WiFi',max:32,req:1},
+   {id:'pw',label:'Password',ph:'Leave empty for an open network',max:63,half:1},
    {id:'sec',label:'Security',select:['WPA','WEP','nopass'],half:1}],
   build:function(v){
     var ss=String(v.ss||'').trim(),pw=String(v.pw||''),sec=v.sec||'WPA';
-    if(!ss)return {err:{ss:'Wi-Fi ka naam daalo.'}};
+    if(!ss)return {err:{ss:'Enter the Wi-Fi name.'}};
     if(sec!=='nopass'&&!pw)sec='nopass';
     var u='WIFI:T:'+(sec==='nopass'?'nopass':sec)+';S:'+wifiEsc(ss)+';'+(sec==='nopass'?'':'P:'+wifiEsc(pw)+';')+';';
     return {payload:u,gist:'Wi-Fi: '+ss,caption:'SCAN TO JOIN WI-FI',label:'',foot:CHIP,kind:'Wi-Fi'};
   }},
- {id:'vcard',label:'Contact',hint:'Scan karke contact phone me save ho jayega.',
+ {id:'vcard',label:'Contact',hint:'Scanning saves the contact straight to the phone.',
   fields:[
-   {id:'nm',label:'Naam',ph:'e.g. Akash Vishwakarma',max:60,req:1},
+   {id:'nm',label:'Name',ph:'e.g. Akash Vishwakarma',max:60,req:1},
    {id:'ph',label:'Phone',ph:'e.g. 9876543210',max:20,mode:'tel',half:1},
    {id:'em',label:'Email',ph:'e.g. name@example.com',max:80,mode:'email',half:1},
-   {id:'og',label:'Company / kaam (optional)',ph:'e.g. Linux Admin',max:60}],
+   {id:'og',label:'Company / role (optional)',ph:'e.g. Linux Admin',max:60}],
   noLabel:true,
   build:function(v){
-    var nm=clean(v.nm),e={};if(!nm)e.nm='Naam daalo.';
+    var nm=clean(v.nm),e={};if(!nm)e.nm='Enter a name.';
     var ph=clean(v.ph),em=clean(v.em),p;
     if(ph){p=phoneDigits(ph,'91');if(p.err)e.ph=p.err}
-    if(em&&!EMAIL.test(em))e.em='Email sahi nahi lag raha.';
-    if(!ph&&!em&&!e.nm)e.ph='Phone ya email me se ek daalo.';
+    if(em&&!EMAIL.test(em))e.em='That email does not look right.';
+    if(!ph&&!em&&!e.nm)e.ph='Enter at least a phone or an email.';
     if(Object.keys(e).length)return {err:e};
     var s='BEGIN:VCARD\nVERSION:3.0\nFN:'+vEsc(nm)+'\nN:'+vEsc(nm)+';;;;\n';
     if(clean(v.og))s+='ORG:'+vEsc(clean(v.og))+'\n';
     if(p)s+='TEL:+'+p.digits+'\n';if(em)s+='EMAIL:'+em+'\n';s+='END:VCARD';
     return {payload:s,gist:p?'+'+p.digits:em,caption:'SAVE CONTACT',label:nm,sub:clean(v.og),foot:CHIP,kind:'Contact'};
   }},
- {id:'email',label:'Email',hint:'Scan karte hi email likhne ka screen khulega.',
+ {id:'email',label:'Email',hint:'Scanning opens a new email draft.',
   fields:[{id:'em',label:'Email address',ph:'e.g. name@example.com',max:80,mode:'email',req:1},
    {id:'su',label:'Subject (optional)',ph:'e.g. Enquiry',max:100},
    {id:'bd',label:'Message (optional)',ph:'',max:300,area:true}],
   build:function(v){
-    var em=clean(v.em);if(!EMAIL.test(em))return {err:{em:'Email sahi nahi lag raha.'}};
+    var em=clean(v.em);if(!EMAIL.test(em))return {err:{em:'That email does not look right.'}};
     var u='mailto:'+em,q=[];if(clean(v.su))q.push('subject='+enc(clean(v.su)));if(clean(v.bd))q.push('body='+enc(clean(v.bd)));
     if(q.length)u+='?'+q.join('&');
     return {payload:u,gist:em,caption:'SCAN TO EMAIL',foot:CHIP,kind:'Email'};
   }},
- {id:'text',label:'Text',hint:'Koi bhi text. Scan karne wale ko wahi text dikhega. Hindi bhi chalega.',
-  fields:[{id:'tx',label:'Text',ph:'Kuch bhi likho...',max:900,area:true,req:1}],
+ {id:'text',label:'Text',hint:'Any text at all. Whoever scans it sees exactly this text. Hindi works too.',
+  fields:[{id:'tx',label:'Text',ph:'Type anything...',max:900,area:true,req:1}],
   build:function(v){
     var t=String(v.tx||'').trim();if(!t)return {empty:true};
     return {payload:t,gist:short(clean(t),48),caption:'SCAN TO READ',foot:CHIP,kind:'Text'};
@@ -169,8 +169,8 @@ function detect(s){
   return 'text';
 }
 function rawUpi(s){
-  var q={};try{new URL(s).searchParams.forEach(function(v,k){q[k]=v})}catch(e){return {err:{any:'UPI link sahi nahi hai.'}}}
-  if(!q.pa||!VPA.test(q.pa))return {err:{any:'UPI link me UPI ID nahi mili.'}};
+  var q={};try{new URL(s).searchParams.forEach(function(v,k){q[k]=v})}catch(e){return {err:{any:'That UPI link is not valid.'}}}
+  if(!q.pa||!VPA.test(q.pa))return {err:{any:'No UPI ID found in that UPI link.'}};
   return {payload:s.trim(),gist:'UPI ID: '+q.pa,gist2:q.am?'Rs '+q.am:'',caption:'SCAN & PAY',label:q.pn||'',foot:'GPay  |  PhonePe  |  Paytm  |  BHIM  |  any UPI app',kind:'UPI',detected:'UPI payment'};
 }
 
@@ -232,7 +232,7 @@ function renderFields(){
     if(close){h+='</div>';half=false}
     if(open){h+='<div class="two">';half=true}
     h+='<div><label for="f_'+f.id+'">'+esc(f.label)+'</label>';
-    if(f.select){h+='<select id="f_'+f.id+'" data-f="'+f.id+'">'+f.select.map(function(o){return '<option value="'+o+'"'+(val===o?' selected':'')+'>'+(o==='nopass'?'Koi password nahi':o)+'</option>'}).join('')+'</select>'}
+    if(f.select){h+='<select id="f_'+f.id+'" data-f="'+f.id+'">'+f.select.map(function(o){return '<option value="'+o+'"'+(val===o?' selected':'')+'>'+(o==='nopass'?'No password':o)+'</option>'}).join('')+'</select>'}
     else if(f.area)h+='<textarea id="f_'+f.id+'" data-f="'+f.id+'" rows="3" maxlength="'+(f.max||500)+'" placeholder="'+esc(f.ph||'')+'">'+esc(val)+'</textarea>';
     else h+='<input id="f_'+f.id+'" data-f="'+f.id+'" type="text" maxlength="'+(f.max||100)+'" placeholder="'+esc(f.ph||'')+'"'+(f.mode?' inputmode="'+f.mode+'"':'')+' autocapitalize="off" spellcheck="false" value="'+esc(val)+'">';
     h+='<div class="err" id="e_'+f.id+'" role="alert"></div></div>';
@@ -328,17 +328,17 @@ function render(){
   var c=currentResult(),T=c.T,r=c.r;
   showErrors(T,r,touched);
   var ok=r&&!r.err&&!r.empty;
-  var det=$('detect');det.textContent=ok&&r.detected?'\u2713 Pehchana: '+r.detected:'';
+  var det=$('detect');det.textContent=ok&&r.detected?'\u2713 Detected: '+r.detected:'';
   if(ok){
     var bytes=(new TextEncoder()).encode(r.payload).length;
-    if(bytes>1000){ok=false;r={err:{}};var f=T.fields[0];touched[f.id]=1;var e=$('e_'+f.id);if(e)e.textContent='Bahut lamba hai ('+bytes+' bytes). 1000 se kam rakho taaki QR aasani se scan ho.'}
+    if(bytes>1000){ok=false;r={err:{}};var f=T.fields[0];touched[f.id]=1;var e=$('e_'+f.id);if(e)e.textContent='That is too long ('+bytes+' bytes). Keep it under 1000 so the QR stays easy to scan.'}
   }
   var buttons=['dlPng','dlQr','dlSvg','share','copy','print'];
   buttons.forEach(function(id){$(id).disabled=!ok});
   $('stage').classList.toggle('ready',ok);
   $('thumbs').style.display=ok?'':'none';$('scanBadge').hidden=!ok;
   if(!ok){cur=null;return}
-  var q;try{q=QRCore.make(r.payload,'M')}catch(ex){cur=null;buttons.forEach(function(id){$(id).disabled=true});$('stage').classList.remove('ready');$('thumbs').style.display='none';$('scanBadge').hidden=true;var f0=T.fields[0],e0=$('e_'+f0.id);if(e0)e0.textContent='Ye content QR me nahi aa raha, thoda chhota karo.';return}
+  var q;try{q=QRCore.make(r.payload,'M')}catch(ex){cur=null;buttons.forEach(function(id){$(id).disabled=true});$('stage').classList.remove('ready');$('thumbs').style.display='none';$('scanBadge').hidden=true;var f0=T.fields[0],e0=$('e_'+f0.id);if(e0)e0.textContent='This content does not fit in a QR code. Make it a bit shorter.';return}
   if(!T.noLabel){r.label=clean($('lb').value)||r.label||'';r.sub=clean($('sb').value)||r.sub||''}
   r.q=q;cur=r;
   var my=++gen;
@@ -350,7 +350,7 @@ function render(){
   });
   var mc=minContrast(st),ver=q.getModuleCount();
   var b=$('scanBadge');b.className='scanbadge'+(mc<4.5?' warn':'');
-  b.textContent=(mc<4.5?'\u26A0 Contrast kam hai. ':'\u2713 Scan-safe: ')+'contrast '+mc.toFixed(1)+':1, QR '+ver+'x'+ver;
+  b.textContent=(mc<4.5?'\u26A0 Low contrast. ':'\u2713 Scan-safe: ')+'contrast '+mc.toFixed(1)+':1, QR '+ver+'x'+ver;
   save();
 }
 function getStyle(id){for(var i=0;i<STYLES.length;i++)if(STYLES[i].id===id)return STYLES[i];return STYLES[0]}
@@ -375,7 +375,7 @@ $('remember').addEventListener('change',save);
 
 function toast(m){var t=$('toast');t.textContent=m;clearTimeout(toast.t);toast.t=setTimeout(function(){t.textContent=''},2800)}
 function slug(){var b=(cur&&(cur.label||cur.gist)||'qr');return 'qr-'+(String(b).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'code')}
-function dlBlob(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);toast('Download ho gaya')}
+function dlBlob(blob,name){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);toast('Downloaded')}
 function cardCanvas(styleId,cb){var c=document.createElement('canvas');c.width=1080;c.height=1500;card(c.getContext('2d'),getStyle(styleId),cur,1080,1500,function(err){cb(err?null:c)})}
 function qrCanvas(styleId,cb){
   var st=getStyle(styleId),S2=1200,c=document.createElement('canvas');c.width=c.height=S2;var x=c.getContext('2d'),img=new Image();
@@ -388,10 +388,10 @@ $('dlSvg').addEventListener('click',function(){if(!cur)return;dlBlob(new Blob([q
 $('print').addEventListener('click',function(){if(cur)window.print()});
 function copyText(t,msg){
   var done=function(){toast(msg)};
-  function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');done()}catch(e){toast('Copy allowed nahi hai')}a.remove()}
+  function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');done()}catch(e){toast('Copy is not allowed here')}a.remove()}
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,fb);else fb();
 }
-$('copy').addEventListener('click',function(){if(cur)copyText(cur.payload,'Link copy ho gaya')});
+$('copy').addEventListener('click',function(){if(cur)copyText(cur.payload,'Link copied')});
 $('share').addEventListener('click',function(){
   if(!cur)return;
   cardCanvas(S.style,function(c){
@@ -400,7 +400,7 @@ $('share').addEventListener('click',function(){
       var f=new File([b],slug()+'.png',{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:cur.label||'QR code'}).catch(function(){})}
       else if(navigator.share){navigator.share({title:cur.label||'QR code',text:cur.payload}).catch(function(){})}
-      else{dlBlob(b,slug()+'.png');toast('Share is device par nahi hai, PNG download kar di')}
+      else{dlBlob(b,slug()+'.png');toast('Sharing is not available on this device, so the PNG was downloaded')}
     },'image/png');
   });
 });
@@ -428,7 +428,7 @@ function load(){
   if(p.get('pa')){S.type='upi';S.vals['upi.pa']=p.get('pa');S.vals['upi.pn']=p.get('pn')||S.vals['upi.pn']||'';S.vals['upi.am']=p.get('am')||'';S.vals['upi.tn']=p.get('tn')||''}
   if(!getStyle(S.style)||!STYLES.some(function(s){return s.id===S.style}))S.style='neon';
 }
-$('notice').innerHTML='<b>Dhyan do:</b> QR sirf wahi cheez kholta hai jo uske andar likhi hai. UPI QR me paisa seedha customer se aapke UPI ID par jata hai, yahan koi payment nahi hoti. Print karne se pehle apne phone se ek baar scan karke dekh lo. Photo/video ki file QR me nahi jaati, uska link jaata hai.';
+$('notice').innerHTML='<b>Good to know:</b> a QR code only opens what is written inside it. With a UPI QR the money goes straight from the customer to your UPI ID; no payment happens here. Scan the QR once with your own phone before printing. A photo or video file cannot go inside a QR code, only its link can.';
 load();renderTypes();renderFields();renderThumbs();render();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(function(){});
 window.QRS={TYPES:TYPES,STYLES:STYLES,detect:detect,qrSvg:qrSvg,minContrast:minContrast,cur:function(){return cur},

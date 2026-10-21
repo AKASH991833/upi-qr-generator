@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>QR Studio - QR for UPI, link, YouTube, WhatsApp, Wi-Fi and more</title>
-<meta name="description" content="Free QR code maker. Paste any link, YouTube video, UPI, WhatsApp, phone, Wi-Fi, contact or text. Add a name, pick one of 4 premium styles, download PNG or SVG. No sign-up, nothing uploaded.">
-<meta name="theme-color" content="#6d5dfc">
+<title>QR Studio - QR codes for UPI, links, YouTube, WhatsApp, Wi-Fi and more</title>
+<meta name="description" content="Free QR code maker. Paste any link, YouTube video, UPI ID, WhatsApp number, phone, Wi-Fi, contact or text. Add a name, pick one of 4 premium styles, and download a PNG or SVG. No sign-up, nothing uploaded.">
+<meta name="theme-color" content="#4f46e5">
 <meta property="og:title" content="QR Studio">
 <meta property="og:description" content="Any QR in 10 seconds: link, YouTube, UPI, WhatsApp, Wi-Fi. 4 premium styles. Free and private.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
@@ -16,50 +16,50 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><img src="icon.svg" alt="" width="34" height="34"><div><b>QR Studio</b><span>sab kuch ka QR</span></div></div>
+  <div class="brand"><img src="icon.svg" alt="" width="36" height="36"><div><b>QR Studio</b><span>every QR you need</span></div></div>
   <button id="themeBtn" class="icon-btn" type="button" aria-label="Switch dark or light mode" title="Dark / Light"><span aria-hidden="true">&#9680;</span></button>
 </header>
 
 <main class="wrap">
   <section class="hero">
-    <h1>Kuch bhi paste karo, <em>premium QR</em> pao</h1>
-    <p>Website, YouTube video, UPI, WhatsApp, Wi-Fi, contact ya text. Naam likho, 4 futuristic style me se chuno, PNG ya SVG download karo.</p>
+    <h1>Paste anything, get a <em>premium QR</em></h1>
+    <p>Website, YouTube video, UPI, WhatsApp, Wi-Fi, contact or plain text. Add a name, pick one of 4 futuristic styles, and download a PNG or SVG.</p>
   </section>
 
   <div class="grid">
     <form id="form" class="card" autocomplete="off" novalidate>
-      <h2>1. Kis cheez ka QR?</h2>
+      <h2>What is the QR for?</h2>
       <div id="types" class="types" role="radiogroup" aria-label="QR type"></div>
 
       <div id="fields" class="fields"></div>
 
       <div id="labelBox">
-        <h2 class="mt">2. Naam / Label <small>(optional)</small></h2>
-        <label for="lb">Naam ya kis liye <small>(QR card par dikhega)</small></label>
-        <input id="lb" type="text" maxlength="50" placeholder="e.g. Akash ka YouTube / Shop Wi-Fi">
-        <label for="sb">Chhoti line <small>(optional)</small></label>
-        <input id="sb" type="text" maxlength="60" placeholder="e.g. Scan karke subscribe karo">
+        <h2 class="mt">Name / label <small>(optional)</small></h2>
+        <label for="lb">Name or purpose <small>(printed on the QR card)</small></label>
+        <input id="lb" type="text" maxlength="50" placeholder="e.g. My YouTube channel / Shop Wi-Fi">
+        <label for="sb">Short line <small>(optional)</small></label>
+        <input id="sb" type="text" maxlength="60" placeholder="e.g. Scan to subscribe">
       </div>
 
-      <h2 class="mt" id="h3">3. Style chuno</h2>
+      <h2 class="mt" id="h3">Pick a style</h2>
       <div id="styles" class="styles" role="radiogroup" aria-label="QR style"></div>
 
-      <label class="chk"><input id="remember" type="checkbox"> Meri details is phone me yaad rakho</label>
+      <label class="chk"><input id="remember" type="checkbox"> Remember my details on this device</label>
 
       <div class="notice" id="notice"></div>
     </form>
 
     <section class="card preview" aria-live="polite">
-      <h2>Aapka QR</h2>
+      <h2>Your QR</h2>
       <div id="stage" class="stage">
         <canvas id="cv" width="1080" height="1500" aria-label="QR card preview"></canvas>
-        <div id="empty" class="empty">Details bharo.<br>QR yahan dikhega.</div>
+        <div id="empty" class="empty">Fill in the details.<br>Your QR will appear here.</div>
       </div>
       <div id="scanBadge" class="scanbadge" hidden></div>
       <div id="thumbs" class="thumbs" role="radiogroup" aria-label="Pick a style"></div>
       <div class="actions">
-        <button id="dlPng" class="btn primary" type="button" disabled>Card download (PNG)</button>
-        <button id="dlQr" class="btn" type="button" disabled>Sirf QR (PNG)</button>
+        <button id="dlPng" class="btn primary" type="button" disabled>Download card (PNG)</button>
+        <button id="dlQr" class="btn" type="button" disabled>QR only (PNG)</button>
         <button id="dlSvg" class="btn" type="button" disabled>SVG</button>
         <button id="share" class="btn" type="button" disabled>Share</button>
         <button id="copy" class="btn" type="button" disabled>Copy link</button>
@@ -67,19 +67,19 @@
       </div>
       <div id="toast" class="toast" role="status"></div>
       <details class="how">
-        <summary>Kaise use karein</summary>
+        <summary>How to use</summary>
         <ol>
-          <li>Type chuno (ya "Auto" me kuch bhi paste karo).</li>
-          <li>Naam likho agar chaho, phir style chuno.</li>
-          <li>Download ya Share karo. Print karne se pehle phone se ek baar scan karke check karo.</li>
+          <li>Pick a type (or paste anything into "Auto").</li>
+          <li>Add a name if you like, then choose a style.</li>
+          <li>Download or share. Scan it once with your phone before printing.</li>
         </ol>
-        <p><b>Photo ya video ka QR:</b> QR ke andar file nahi aa sakti, sirf link aata hai. Photo/video ko pehle Google Drive, Google Photos ya Instagram par daalo, "Anyone with the link" share link copy karo, aur "Photo / Video" type me paste karo.</p>
+        <p><b>QR for a photo or video:</b> a QR code cannot hold the file itself, only a link. Upload the photo or video to Google Drive, Google Photos or Instagram, copy the "Anyone with the link" share link, and paste it into the "Photo / Video" type.</p>
       </details>
     </section>
   </div>
 
   <footer>
-    <p>Free. Sign-up nahi. Aapka data sirf aapke device par rehta hai, kuch upload nahi hota. <a href="https://github.com/AKASH991833/upi-qr-generator" rel="noopener">GitHub</a></p>
+    <p>Free. No sign-up. Your data stays on your device; nothing is uploaded. <a href="https://github.com/AKASH991833/upi-qr-generator" rel="noopener">GitHub</a></p>
   </footer>
 </main>
 <script src="vendor/qrcore.js"></script>

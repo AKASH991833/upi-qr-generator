@@ -32,7 +32,7 @@ Free QR code maker. Paste any link, YouTube video, UPI ID, WhatsApp number, phon
 
 ## Features
 
-- Optional **name / label** and a small line under it, printed on the QR card ("Akash ka YouTube", "Shop Wi-Fi").
+- Optional **name / label** and a small line under it, printed on the QR card ("My YouTube channel", "Shop Wi-Fi").
 - **4 styles:** Neon Grid, Aurora, Mono Pro, Sunset Pulse. All of them encode the same content.
 - Dark modules on a light panel in every style, with a live **scan-safe contrast** badge (7:1 or better for all four).
 - Download the **card (PNG)**, **QR only (PNG)** or **SVG**. Share (uses the phone's share sheet when available), copy the link, print.
